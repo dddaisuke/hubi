@@ -7,6 +7,7 @@ import (
 	"golang.org/x/oauth2"
 	"io"
 	"os"
+	"os/user"
 	"reflect"
 	"strconv"
 )
@@ -28,13 +29,20 @@ func main() {
 		return
 	}
 
+	usr, _ := user.Current()
+	conf, err := Parse(usr.HomeDir + "/.github/config.json")
+	if err != nil {
+		fmt.Println("~/.github/config.json が見つかりません。https://github.com/dddaisuke/hubi を参照して下さい。")
+		os.Exit(1)
+	}
+
 	fmt.Printf("[move] manabo-inc/sandbox/issues/%s -> manabo-inc/%s/issues\n", os.Args[1], os.Args[2])
 	var fromIssueNumber int
 	fromIssueNumber, _ = strconv.Atoi(os.Args[1])
 	var toRepositoryName = os.Args[2]
 
 	ts := &tokenSource{
-		&oauth2.Token{AccessToken: "your access token"},
+		&oauth2.Token{AccessToken: conf.AccessToken},
 	}
 
 	tc := oauth2.NewClient(oauth2.NoContext, ts)
@@ -47,11 +55,11 @@ func main() {
 
 	url := Stringify(from_issue.HTMLURL)
 	body := Stringify(from_issue.Body)
-	fmt.Printf("\n---------- %s ----------\n", Stringify(from_issue.Number))
-	fmt.Println(url)
-	fmt.Println(Stringify(from_issue.State))
-	fmt.Println(Stringify(from_issue.Title))
-	fmt.Println("-------------------------\n")
+	fmt.Printf("\n-------------------- [sadbox/issues/%s] --------------------\n", Stringify(from_issue.Number))
+	fmt.Printf("  URL %s\n", url)
+	fmt.Printf("  Status %s\n", Stringify(from_issue.State))
+	fmt.Printf("  Title %s\n", Stringify(from_issue.Title))
+	fmt.Println("-------------------------------------------------------------\n")
 
 	issue := &github.IssueRequest{
 		Title: from_issue.Title,
@@ -60,11 +68,14 @@ func main() {
 
 	client.Issues.Create("manabo-inc", toRepositoryName, issue)
 
-	closeIssue := &github.IssueRequest{
-		State: github.String("closed"),
-	}
+	if len(os.Args) > 3 && os.Args[3] == "-c" {
+		closeIssue := &github.IssueRequest{
+			State: github.String("closed"),
+		}
 
-	client.Issues.Edit("manabo-inc", "sandbox", fromIssueNumber, closeIssue)
+		client.Issues.Edit("manabo-inc", "sandbox", fromIssueNumber, closeIssue)
+		fmt.Printf("[closed] manabo-inc/sandbox/issues/%d\n", fromIssueNumber)
+	}
 }
 
 func Stringify(message interface{}) string {
