@@ -25,7 +25,7 @@ func (t *tokenSource) Token() (*oauth2.Token, error) {
 
 func main() {
 	if len(os.Args) < 3 {
-		fmt.Printf("%s [number of issue] [target repository]", os.Args[0])
+		fmt.Printf("%s [number of issue] [target repository] [-c]\n", os.Args[0])
 		return
 	}
 
