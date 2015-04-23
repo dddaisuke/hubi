@@ -45,7 +45,7 @@ func main() {
 
 	from_issue, _, _ = client.Issues.Get("manabo-inc", "sandbox", fromIssueNumber)
 
-	url := Stringify(from_issue.URL)
+	url := Stringify(from_issue.HTMLURL)
 	body := Stringify(from_issue.Body)
 	fmt.Printf("\n---------- %s ----------\n", Stringify(from_issue.Number))
 	fmt.Println(url)
