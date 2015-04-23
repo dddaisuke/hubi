@@ -14,6 +14,6 @@ https://github.com/settings/applications#personal-access-tokens の`[Generate ne
 ```
 
 # usage
-> icp issue番号 ターゲットとなるリポジトリ名 [-c]
+> $ icp issue番号 ターゲットとなるリポジトリ名 [-c]
 
 `-c`オプションを付けると、コピー元のissueを`CLOSE`します。
